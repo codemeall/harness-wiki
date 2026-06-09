@@ -1,0 +1,34 @@
+{
+  "name": "@codemeall/harness-wiki",
+  "version": "0.1.0",
+  "description": "MCP-first local tooling to scaffold and maintain an LLM Wiki — an agent-maintained markdown knowledge vault.",
+  "type": "module",
+  "bin": {
+    "harness-wiki": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "prompts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
