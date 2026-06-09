@@ -43,13 +43,26 @@ CLAUDE.md / AGENTS.md      # the agent schema (carries the vault marker)
 
 ## Installation
 
-Use the packaged skill directly:
+Install the packaged skill into your agent's skills directory with one command — no global install, no manual file copying:
 
-```text
-skills/harness-wiki/SKILL.md
+```bash
+npx -y @codemeall/harness-wiki skill-install claude          # Claude Code (~/.claude/skills)
+npx -y @codemeall/harness-wiki skill-install claude-project  # this project's ./.claude/skills
+npx -y @codemeall/harness-wiki skill-install codex           # Codex (~/.codex/skills)
+npx -y @codemeall/harness-wiki skill-install --target <dir>  # any custom skills directory
 ```
 
-For MCP-capable agents, run directly with `npx` (no install):
+| Preset | Installs to |
+|---|---|
+| `claude` | `~/.claude/skills` (Claude Code, personal) |
+| `claude-project` | `./.claude/skills` (Claude Code, this project) |
+| `codex` | `~/.codex/skills` (Codex, personal) |
+| `agents` | `~/.agents/skills` (generic agents, personal) |
+| `local` | `./.agents/skills` (generic agents, this project) |
+
+Once installed, open the folder you want to become a vault and tell your agent: *"Use the Harness Wiki skill to initialize an LLM Wiki vault here."*
+
+For MCP-capable agents, also run the server (no install):
 
 ```bash
 npx -y @codemeall/harness-wiki mcp
@@ -98,6 +111,8 @@ The skill covers initialization, ingest, query, lint, paired projects, and schem
 You can install the packaged skill with the CLI:
 
 ```bash
+npx -y @codemeall/harness-wiki skill-install claude
+npx -y @codemeall/harness-wiki skill-install claude-project
 npx -y @codemeall/harness-wiki skill-install codex
 npx -y @codemeall/harness-wiki skill-install agents
 npx -y @codemeall/harness-wiki skill-install local

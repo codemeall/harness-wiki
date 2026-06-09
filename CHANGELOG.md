@@ -9,7 +9,8 @@ Committed to the **wiki↔repo↔bridge wedge** plus the one cheap-and-universal
 - **Added** source-hash staleness detection. `vault_stamp` (MCP tool + `vault-stamp` CLI) records `source_file` + `source_sha256` into each `wiki/sources/*.md` page. `vault_doctor` now reports `staleSources` (raw file changed since ingest), `unhashedSources` (not yet stamped), and `missingRawSources` (paired raw file gone). The ingest workflow in the skill, prompt, and generated schema now ends with a stamp step.
 - **Added** `vault_link` (MCP tool + `vault-link` CLI): registers a sibling project in the vault's Paired-projects table **and** writes a marker-fenced back-pointer into that project's `CLAUDE.md`, making the relationship discoverable from both repos. Idempotent; re-linking the same name updates the row in place. `vault_doctor` now reports `brokenPairedProjects` (table rows whose path is missing).
 - **Added** the synthesis→spec→implementation handoff to the skill and generated schema: approved syntheses hand off to the paired repo, and `harness-bridge` tracks the current work there.
-- **Docs**: README now headlines the wiki↔repo↔bridge wedge; lint docs cover staleness; the example vault is stamped and verifies clean.
+- **Added** `claude` and `claude-project` presets to `skill-install` (`~/.claude/skills` and `./.claude/skills`), so Claude Code users can install the skill with a single `npx` command instead of copying the file by hand. CLI help now lists every preset and its destination.
+- **Docs**: README now headlines the wiki↔repo↔bridge wedge and leads installation with the one-command `skill-install`; lint docs cover staleness; the example vault is stamped and verifies clean.
 - **Internal**: added `slugify`-based `rawFileIndex`, a minimal frontmatter reader/writer, and `pairedProjectsFromClaude` table parsing — no new runtime dependencies.
 
 ## 0.2.0

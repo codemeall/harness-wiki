@@ -70,10 +70,12 @@ Provider examples:
 The packaged skill can also be installed with:
 
 ```bash
-npx -y @codemeall/harness-wiki skill-install codex
-npx -y @codemeall/harness-wiki skill-install agents
-npx -y @codemeall/harness-wiki skill-install local
-npx -y @codemeall/harness-wiki skill-install --target ./.agents/skills
+npx -y @codemeall/harness-wiki skill-install claude          # ~/.claude/skills
+npx -y @codemeall/harness-wiki skill-install claude-project  # ./.claude/skills
+npx -y @codemeall/harness-wiki skill-install codex           # ~/.codex/skills
+npx -y @codemeall/harness-wiki skill-install agents          # ~/.agents/skills
+npx -y @codemeall/harness-wiki skill-install local           # ./.agents/skills
+npx -y @codemeall/harness-wiki skill-install --target ./path/to/skills
 ```
 
 ### 2. Use MCP if available

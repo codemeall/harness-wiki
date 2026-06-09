@@ -7,7 +7,16 @@ export const SKILL_NAME = "harness-wiki";
 export const SKILL_FILE = "SKILL.md";
 export const SKILL_SOURCE = new URL("../../skills/harness-wiki/SKILL.md", import.meta.url);
 
-export type SkillInstallPreset = "codex" | "agents" | "local";
+export type SkillInstallPreset = "claude" | "claude-project" | "codex" | "agents" | "local";
+
+/** Human-readable description of where each preset installs, for CLI help. */
+export const SKILL_PRESETS: Record<SkillInstallPreset, string> = {
+  claude: "~/.claude/skills (Claude Code, personal)",
+  "claude-project": "./.claude/skills (Claude Code, this project)",
+  codex: "~/.codex/skills (Codex, personal)",
+  agents: "~/.agents/skills (generic agents, personal)",
+  local: "./.agents/skills (generic agents, this project)"
+};
 
 export interface InstallSkillOptions {
   targetDir: string;
@@ -22,9 +31,19 @@ export interface InstallSkillResult {
 }
 
 export function skillTargetDir(preset: SkillInstallPreset, cwd = process.cwd()): string {
-  if (preset === "codex") return path.join(os.homedir(), ".codex", "skills");
-  if (preset === "agents") return path.join(os.homedir(), ".agents", "skills");
-  return path.join(cwd, ".agents", "skills");
+  switch (preset) {
+    case "claude":
+      return path.join(os.homedir(), ".claude", "skills");
+    case "claude-project":
+      return path.join(cwd, ".claude", "skills");
+    case "codex":
+      return path.join(os.homedir(), ".codex", "skills");
+    case "agents":
+      return path.join(os.homedir(), ".agents", "skills");
+    case "local":
+    default:
+      return path.join(cwd, ".agents", "skills");
+  }
 }
 
 export function expandHome(input: string): string {

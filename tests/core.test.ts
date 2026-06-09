@@ -359,6 +359,14 @@ describe("skill installer", () => {
     expect(fs.readFileSync(result.target, "utf8")).toContain("name: harness-wiki");
   });
 
+  it("resolves preset skill directories, including Claude Code", async () => {
+    const { skillTargetDir } = await import("../src/core/skill.js");
+    expect(skillTargetDir("claude")).toBe(path.join(os.homedir(), ".claude", "skills"));
+    expect(skillTargetDir("claude-project", "/proj")).toBe(path.join("/proj", ".claude", "skills"));
+    expect(skillTargetDir("codex")).toBe(path.join(os.homedir(), ".codex", "skills"));
+    expect(skillTargetDir("local", "/proj")).toBe(path.join("/proj", ".agents", "skills"));
+  });
+
   it("refuses to overwrite an existing skill without force", async () => {
     const { installSkill } = await import("../src/core/skill.js");
     installSkill({ targetDir: installDir });

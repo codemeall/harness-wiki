@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { initVault, vaultStatus, vaultDoctor, vaultSearch, stampSources, linkProject } from "./core/vault.js";
 import { runMcpServer } from "./mcp/server.js";
-import { installSkill, skillTargetDir, type SkillInstallPreset } from "./core/skill.js";
+import { installSkill, skillTargetDir, SKILL_PRESETS, type SkillInstallPreset } from "./core/skill.js";
 import path from "node:path";
 
 function usage(): never {
@@ -13,8 +13,13 @@ function usage(): never {
   harness-wiki vault-search <query> [--cwd <path>] [--limit <n>]
   harness-wiki vault-stamp [--cwd <path>]
   harness-wiki vault-link --name <name> --path <path> --purpose <text> --status <text> [--cwd <path>] [--vault-name <name>]
-  harness-wiki skill-install <codex|agents|local> [--force]
+  harness-wiki skill-install <claude|claude-project|codex|agents|local> [--force]
   harness-wiki skill-install --target <skillsDir> [--force]
+
+skill-install presets:
+${Object.entries(SKILL_PRESETS)
+  .map(([k, v]) => `  ${k.padEnd(15)} ${v}`)
+  .join("\n")}
 `);
   process.exit(2);
 }
@@ -31,7 +36,7 @@ function resolveCwd(args: string[]): string {
 }
 
 function isSkillInstallPreset(value: string | undefined): value is SkillInstallPreset {
-  return value === "codex" || value === "agents" || value === "local";
+  return value !== undefined && value in SKILL_PRESETS;
 }
 
 async function main() {
