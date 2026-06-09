@@ -4,6 +4,8 @@ LLM Wiki is a separate product workflow from Harness Bridge. It creates a long-l
 
 Harness Bridge tracks **current in-flight work** in one project repo. LLM Wiki tracks **durable knowledge** across projects, research, and decisions.
 
+The pattern originates with Andrej Karpathy's [LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f); Harness Wiki is an independent implementation that packages it as a reusable skill, MCP server, and CLI.
+
 ## What it is
 
 An LLM Wiki is a structured, interlinked collection of markdown files:

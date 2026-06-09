@@ -4,6 +4,8 @@
 
 You curate sources and ask questions; the agent summarizes, cross-references, files, flags contradictions, and keeps an index and log current. Unlike file-upload RAG, an LLM Wiki compiles knowledge into durable, interlinked pages instead of retrieving chunks from scratch on every query.
 
+> Based on Andrej Karpathy's [LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) concept — see [Credits](#credits).
+
 > **Companion product.** [`@codemeall/harness-bridge`](https://github.com/codemeall/harness-bridge) tracks the **current in-flight task** in one repo via `.harness/bridge.md`. Harness Wiki tracks the **durable knowledge** around many tasks — research, design rationale, decisions. Use them together: wiki for the *why*, project repos for the *what*, bridge files for the *current work*.
 
 ## Quickstart
@@ -207,6 +209,10 @@ If your agent cannot load skills, paste [`prompts/vault-init.md`](./prompts/vaul
 
 - [`docs/llm-wiki.md`](./docs/llm-wiki.md) — full setup, daily ingest/query/lint workflow, and when to use the wiki vs. a project repo.
 - [`docs/example-feature-workflow.md`](./docs/example-feature-workflow.md) — a worked flow: tracking features, a pending list, moving items to done, reopening them, and asking about a feature's options.
+
+## Credits
+
+The LLM Wiki pattern this tool implements was described by **Andrej Karpathy** in his [LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) — an idea file meant to be handed to an LLM agent, which then builds out the specifics with you. Harness Wiki packages that pattern as a portable skill, MCP server, and CLI so it's repeatable across agents and projects. Credit for the underlying concept is his; this repository is an independent implementation.
 
 ## License
 

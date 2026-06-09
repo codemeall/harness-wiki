@@ -16,3 +16,7 @@ an LLM agent, which then builds out the specifics in collaboration with the user
 
 - Frames the workflow as: the human curates and asks; the agent maintains.
 - Emphasizes that the pattern is intentionally abstract and domain-agnostic.
+
+## Links
+
+- Original gist: <https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f>

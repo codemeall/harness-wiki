@@ -10,7 +10,7 @@ Committed to the **wiki↔repo↔bridge wedge** plus the one cheap-and-universal
 - **Added** `vault_link` (MCP tool + `vault-link` CLI): registers a sibling project in the vault's Paired-projects table **and** writes a marker-fenced back-pointer into that project's `CLAUDE.md`, making the relationship discoverable from both repos. Idempotent; re-linking the same name updates the row in place. `vault_doctor` now reports `brokenPairedProjects` (table rows whose path is missing).
 - **Added** the synthesis→spec→implementation handoff to the skill and generated schema: approved syntheses hand off to the paired repo, and `harness-bridge` tracks the current work there.
 - **Added** `claude` and `claude-project` presets to `skill-install` (`~/.claude/skills` and `./.claude/skills`), so Claude Code users can install the skill with a single `npx` command instead of copying the file by hand. CLI help now lists every preset and its destination.
-- **Docs**: README now headlines the wiki↔repo↔bridge wedge and leads installation with the one-command `skill-install`; lint docs cover staleness; the example vault is stamped and verifies clean.
+- **Docs**: README now headlines the wiki↔repo↔bridge wedge and leads installation with the one-command `skill-install`; lint docs cover staleness; the example vault is stamped and verifies clean. Added attribution to Andrej Karpathy's original [LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) (README Credits, docs, and the example entity page).
 - **Internal**: added `slugify`-based `rawFileIndex`, a minimal frontmatter reader/writer, and `pairedProjectsFromClaude` table parsing — no new runtime dependencies.
 
 ## 0.2.0
