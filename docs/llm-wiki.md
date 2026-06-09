@@ -44,9 +44,30 @@ Skip it for one-off tasks, ephemeral notes, or reference material that is alread
 
 ## Setup
 
-Two setup paths are supported. MCP is recommended when your agent supports it; the prompt path is the fallback.
+Harness Wiki is skill-first. Load the portable skill first, let MCP accelerate setup when available, and use the prompt/manual path as the fallback.
 
-### MCP setup
+### 1. Load the skill
+
+Load `skills/harness-wiki/SKILL.md` into your agent or harness, then open the target directory and say:
+
+```text
+Use the Harness Wiki skill to initialize an LLM Wiki vault here.
+Name: "knowledge"
+Domain: software project
+```
+
+The skill covers initialization, ingest, query, lint, paired projects, and schema maintenance. After initialization, the generated `CLAUDE.md` / `AGENTS.md` schema is the local source of truth.
+
+Provider examples:
+
+| Harness | Skill usage |
+|---|---|
+| Codex-style skills | Install or copy `skills/harness-wiki/SKILL.md` into the skills directory, then ask Codex to use the Harness Wiki skill. |
+| Claude-style project instructions | Add the skill text to project instructions or paste it at session start; after init, follow `CLAUDE.md`. |
+| ChatGPT/custom harnesses | Load the skill as system/developer instructions or the first message. |
+| Generic agents | Paste the skill text and point the agent at the target directory. |
+
+### 2. Use MCP if available
 
 Configure the package as an MCP server in your agent:
 
@@ -67,12 +88,12 @@ node /absolute/path/to/harness-wiki/dist/cli.js mcp
 Open the target directory in your agent and say:
 
 ```text
-Use harness-wiki to initialize an LLM Wiki vault here.
+Use the Harness Wiki skill to initialize an LLM Wiki vault here.
 Name: "knowledge"
 Domain: software project
 ```
 
-The agent calls `vault_init`. The tool auto-detects the scenario:
+When MCP is available, the skill should call `vault_init`. The tool auto-detects the scenario:
 
 | Scenario | Result |
 |---|---|
@@ -81,9 +102,9 @@ The agent calls `vault_init`. The tool auto-detects the scenario:
 
 Use `vault_status` any time to report scaffold state and list files in `raw/` that do not yet have matching `wiki/sources/<slug>.md` pages.
 
-### Prompt setup
+### 3. Prompt/manual fallback
 
-If your agent does not support MCP:
+If your agent cannot load skills or use MCP:
 
 1. Open the directory that should become the vault.
 2. Paste [`prompts/vault-init.md`](../prompts/vault-init.md) as the first message.

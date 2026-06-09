@@ -4,9 +4,9 @@ Use this prompt to set up an **LLM Wiki** (a personal knowledge base maintained 
 
 This is a separate product workflow from Harness Bridge. Harness Bridge handles **in-session continuity** for a single project; LLM Wiki handles **cross-project knowledge accumulation**. Together: wiki for the *why*, project repos for the *what*, bridge files for the *current work*.
 
-Paste this entire prompt as your first message to a fresh AI agent session, opened in the directory you want to become your vault.
+Paste this entire prompt as your first message to a fresh AI agent session, opened in the directory you want to become your vault. If your harness can load skills, prefer the packaged skill at `skills/harness-wiki/SKILL.md`; this prompt is the long-form fallback.
 
-> **MCP-capable agents:** if `harness-wiki` is configured as an MCP server, call the `vault_init` tool to create the folders and schema deterministically instead of writing them by hand at step 2 below. The tool auto-detects whether the directory is empty (writes a standalone vault) or already holds a project (appends a marker-fenced vault schema to the host `CLAUDE.md` / `AGENTS.md`). The rest of this prompt — domain discussion, first ingest demo, schema confirmation — still applies.
+> **MCP-capable agents:** if `harness-wiki` is configured as an MCP server, use MCP as an accelerator. Call the `vault_init` tool to create the folders and schema deterministically instead of writing them by hand at step 2 below. The tool auto-detects whether the directory is empty (writes a standalone vault) or already holds a project (appends a marker-fenced vault schema to the host `CLAUDE.md` / `AGENTS.md`). The rest of this prompt — domain discussion, first ingest demo, schema confirmation — still applies.
 
 ---
 

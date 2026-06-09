@@ -1,6 +1,6 @@
 # Harness Wiki
 
-**MCP-first local tooling to scaffold and maintain an _LLM Wiki_ — a long-lived, agent-maintained markdown knowledge vault.**
+**Skill-first tooling to scaffold and maintain an _LLM Wiki_ — a long-lived, agent-maintained markdown knowledge vault.**
 
 You curate sources and ask questions; the agent summarizes, cross-references, files, flags contradictions, and keeps an index and log current. Unlike file-upload RAG, an LLM Wiki compiles knowledge into durable, interlinked pages instead of retrieving chunks from scratch on every query.
 
@@ -8,7 +8,7 @@ You curate sources and ask questions; the agent summarizes, cross-references, fi
 
 ## What you get
 
-`harness-wiki` scaffolds and inspects a vault. The actual ingest/query/lint operations are agent-driven, guided by the schema written into `CLAUDE.md` / `AGENTS.md`.
+`harness-wiki` gives agents a portable skill for the full vault lifecycle. MCP and CLI commands are optional accelerators for deterministic scaffold/status operations; the actual ingest/query/lint operations are agent-driven, guided by the skill and the schema written into `CLAUDE.md` / `AGENTS.md`.
 
 ```
 raw/                       # immutable source documents you curate (assets in raw/assets/)
@@ -23,7 +23,13 @@ CLAUDE.md / AGENTS.md      # the agent schema (carries the vault marker)
 
 ## Installation
 
-Run directly with `npx` (no install):
+Use the packaged skill directly:
+
+```text
+skills/harness-wiki/SKILL.md
+```
+
+For MCP-capable agents, run directly with `npx` (no install):
 
 ```bash
 npx -y @codemeall/harness-wiki mcp
@@ -48,9 +54,29 @@ Requires Node.js >= 20.
 
 ## Usage
 
-### MCP (recommended)
+### Skill-first usage
 
-Register Harness Wiki as an MCP server in your agent. Example MCP client config:
+Load [`skills/harness-wiki/SKILL.md`](./skills/harness-wiki/SKILL.md) into your agent or harness, then open the directory you want to become a vault and say:
+
+```text
+Use the Harness Wiki skill to initialize an LLM Wiki vault here.
+Name: "knowledge"
+Domain: software project
+```
+
+The skill covers initialization, ingest, query, lint, paired projects, and schema maintenance. Once the vault exists, the generated `CLAUDE.md` / `AGENTS.md` schema becomes the local operating contract.
+
+**Codex-style skills:** install or copy `skills/harness-wiki/SKILL.md` into your skills directory, then ask Codex to use the Harness Wiki skill in the vault directory.
+
+**Claude-style project instructions:** add the skill text to project instructions or paste it at the start of the session. After initialization, Claude should follow the generated `CLAUDE.md`.
+
+**ChatGPT/custom harnesses:** load the skill as the system/developer instruction or first user message for the session. If your harness supports local tools, expose MCP as described below.
+
+**Generic agents:** paste the skill text, then point the agent at the target directory. The skill includes the manual non-MCP setup path.
+
+### MCP accelerator
+
+Register Harness Wiki as an MCP server when your agent supports MCP. The skill will use MCP for deterministic scaffold/status operations. Example MCP client config:
 
 ```json
 {
@@ -79,7 +105,7 @@ From a local build, point at the built CLI instead:
 Then open the directory you want to become a vault and tell the agent:
 
 ```text
-Use harness-wiki to initialize an LLM Wiki vault here.
+Use the Harness Wiki skill to initialize an LLM Wiki vault here.
 Name: "knowledge"
 Domain: software project
 ```
@@ -103,9 +129,9 @@ harness-wiki vault-status
 
 From a Git checkout, substitute `node /absolute/path/to/harness-wiki/dist/cli.js` for `harness-wiki`.
 
-### Prompt fallback (no MCP)
+### Prompt fallback
 
-If your agent doesn't support MCP, paste [`prompts/vault-init.md`](./prompts/vault-init.md) as the first message in the directory that should become the vault, and answer the agent's domain questions.
+If your agent cannot load skills, paste [`prompts/vault-init.md`](./prompts/vault-init.md) as the first message in the directory that should become the vault, and answer the agent's domain questions.
 
 ## Documentation
 
