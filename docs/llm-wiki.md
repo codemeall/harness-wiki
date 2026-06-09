@@ -67,6 +67,15 @@ Provider examples:
 | ChatGPT/custom harnesses | Load the skill as system/developer instructions or the first message. |
 | Generic agents | Paste the skill text and point the agent at the target directory. |
 
+The packaged skill can also be installed with:
+
+```bash
+npx -y @codemeall/harness-wiki skill-install codex
+npx -y @codemeall/harness-wiki skill-install agents
+npx -y @codemeall/harness-wiki skill-install local
+npx -y @codemeall/harness-wiki skill-install --target ./.agents/skills
+```
+
 ### 2. Use MCP if available
 
 Configure the package as an MCP server in your agent:
@@ -93,14 +102,14 @@ Name: "knowledge"
 Domain: software project
 ```
 
-When MCP is available, the skill should call `vault_init`. The tool auto-detects the scenario:
+When MCP is available, the skill should call `vault_init` with `cwd` set to the target workspace absolute path. The tool auto-detects the scenario:
 
 | Scenario | Result |
 |---|---|
 | Empty directory | Writes a standalone vault with `raw/`, `wiki/`, `CLAUDE.md`, `AGENTS.md`, `wiki/index.md`, and `wiki/log.md`. |
 | Existing project repo | Creates the vault folders in place and appends a marker-fenced vault schema to the host `CLAUDE.md` / `AGENTS.md` without overwriting existing content. |
 
-Use `vault_status` any time to report scaffold state and list files in `raw/` that do not yet have matching `wiki/sources/<slug>.md` pages.
+Use `vault_status` any time to report scaffold state and list files in `raw/` that do not yet have matching `wiki/sources/<slug>.md` pages. Pass `cwd` for the workspace you want inspected.
 
 ### 3. Prompt/manual fallback
 
@@ -179,8 +188,9 @@ A useful test: if a contributor needs it to understand or change the code, it pr
 The `harness-wiki` package includes local CLI commands:
 
 ```bash
-harness-wiki vault-init --name "knowledge" --domain "software project"
-harness-wiki vault-status
+harness-wiki vault-init --name "knowledge" --domain "software project" [--cwd <path>]
+harness-wiki vault-status [--cwd <path>]
+harness-wiki skill-install <codex|agents|local>
 ```
 
 From a Git checkout:
@@ -189,6 +199,8 @@ From a Git checkout:
 node /absolute/path/to/harness-wiki/dist/cli.js vault-init --name "knowledge"
 node /absolute/path/to/harness-wiki/dist/cli.js vault-status
 ```
+
+`harness-wiki mcp` starts a stdio MCP server and waits for an MCP client. If it appears to hang in a terminal, that is expected; use direct CLI commands for terminal setup.
 
 ## Uninstall
 

@@ -16,18 +16,20 @@ When the user asks to use Harness Wiki, initialize a vault, ingest a source, que
 1. Inspect the current directory for `CLAUDE.md`, `AGENTS.md`, `wiki/index.md`, `wiki/log.md`, and the marker `<!-- harness-wiki:vault-schema -->`.
 2. If the vault exists, follow the local schema in `CLAUDE.md` / `AGENTS.md` as the source of truth.
 3. If the vault does not exist, ask for only missing product intent that cannot be discovered locally: vault name, domain, and paired projects.
-4. If the MCP server is available, call `vault_init` or `vault_status` instead of hand-writing scaffold files.
+4. If the MCP server is available, call `vault_init` or `vault_status` instead of hand-writing scaffold files. Always pass the target workspace absolute path as `cwd`.
 5. If MCP is not available, create or update the scaffold manually according to this skill.
 
 ## Optional MCP accelerator
 
 Use MCP when the harness exposes the `harness-wiki` server:
 
-- `vault_init`: create `raw/`, `raw/assets/`, `wiki/entities/`, `wiki/concepts/`, `wiki/sources/`, `wiki/syntheses/`, `CLAUDE.md`, `AGENTS.md`, `wiki/index.md`, and `wiki/log.md`. Pass `vaultName`, optional `domain`, optional `pairedProjects`, and `force` only for repair.
-- `vault_status`: report scaffold state and list `raw/` files that do not have matching `wiki/sources/<slug>.md` pages.
+- `vault_init`: create `raw/`, `raw/assets/`, `wiki/entities/`, `wiki/concepts/`, `wiki/sources/`, `wiki/syntheses/`, `CLAUDE.md`, `AGENTS.md`, `wiki/index.md`, and `wiki/log.md`. Pass `cwd` as the target workspace absolute path, `vaultName`, optional `domain`, optional `pairedProjects`, and `force` only for repair.
+- `vault_status`: report scaffold state and list `raw/` files that do not have matching `wiki/sources/<slug>.md` pages. Pass `cwd` as the target workspace absolute path.
 - `wiki_init_prompt`: fetch the long-form bootstrap/operations prompt when more detailed setup guidance is needed.
 
 Do not require MCP for normal ingest, query, or lint work. Those operations are agent-maintained using the vault schema.
+
+If an MCP init appears to create files in the wrong place, inspect the intended workspace path and re-run `vault_init` with `cwd` set to that absolute path.
 
 ## Manual initialization
 

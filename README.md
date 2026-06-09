@@ -35,6 +35,13 @@ For MCP-capable agents, run directly with `npx` (no install):
 npx -y @codemeall/harness-wiki mcp
 ```
 
+For direct terminal setup without installing globally:
+
+```bash
+npx -y @codemeall/harness-wiki vault-init --name "knowledge" --domain "software project"
+npx -y @codemeall/harness-wiki vault-status
+```
+
 Or install globally for the CLI:
 
 ```bash
@@ -67,6 +74,20 @@ Domain: software project
 The skill covers initialization, ingest, query, lint, paired projects, and schema maintenance. Once the vault exists, the generated `CLAUDE.md` / `AGENTS.md` schema becomes the local operating contract.
 
 **Codex-style skills:** install or copy `skills/harness-wiki/SKILL.md` into your skills directory, then ask Codex to use the Harness Wiki skill in the vault directory.
+
+You can install the packaged skill with the CLI:
+
+```bash
+npx -y @codemeall/harness-wiki skill-install codex
+npx -y @codemeall/harness-wiki skill-install agents
+npx -y @codemeall/harness-wiki skill-install local
+```
+
+Use `--target <skillsDir>` for a custom harness skills directory:
+
+```bash
+npx -y @codemeall/harness-wiki skill-install --target ./.agents/skills
+```
 
 **Claude-style project instructions:** add the skill text to project instructions or paste it at the start of the session. After initialization, Claude should follow the generated `CLAUDE.md`.
 
@@ -110,12 +131,14 @@ Name: "knowledge"
 Domain: software project
 ```
 
+When calling MCP tools, the agent should pass the target workspace absolute path as `cwd`. This avoids initializing the MCP server launch directory instead of the project directory.
+
 **MCP tools**
 
 | Tool | Purpose |
 |---|---|
-| `vault_init` | Scaffold the vault: creates `raw/`, `wiki/{entities,concepts,sources,syntheses}/`, `CLAUDE.md`, `AGENTS.md`, `wiki/index.md`, `wiki/log.md`. Auto-detects empty dir (standalone vault) vs. existing project (appends a marker-fenced `<!-- harness-wiki:vault-schema -->` block to the host `CLAUDE.md` / `AGENTS.md` without touching other content). Idempotent on re-run via the marker. |
-| `vault_status` | Report scaffold state and list files in `raw/` with no matching `wiki/sources/<slug>.md` (pending ingests). |
+| `vault_init` | Scaffold the vault at optional `cwd`: creates `raw/`, `wiki/{entities,concepts,sources,syntheses}/`, `CLAUDE.md`, `AGENTS.md`, `wiki/index.md`, `wiki/log.md`. Auto-detects empty dir (standalone vault) vs. existing project (appends a marker-fenced `<!-- harness-wiki:vault-schema -->` block to the host `CLAUDE.md` / `AGENTS.md` without touching other content). Idempotent on re-run via the marker. |
+| `vault_status` | Report scaffold state at optional `cwd` and list files in `raw/` with no matching `wiki/sources/<slug>.md` (pending ingests). |
 
 **MCP prompt:** `wiki_init_prompt` returns the canonical setup/operations prompt (also available as the resource `harness-wiki://prompts/vault-init.md`).
 
@@ -123,11 +146,15 @@ Domain: software project
 
 ```bash
 harness-wiki mcp                                              # run the MCP server (stdio)
-harness-wiki vault-init --name "knowledge" --domain "software project" [--force]
-harness-wiki vault-status
+harness-wiki vault-init --name "knowledge" --domain "software project" [--cwd <path>] [--force]
+harness-wiki vault-status [--cwd <path>]
+harness-wiki skill-install <codex|agents|local> [--force]
+harness-wiki skill-install --target <skillsDir> [--force]
 ```
 
 From a Git checkout, substitute `node /absolute/path/to/harness-wiki/dist/cli.js` for `harness-wiki`.
+
+`harness-wiki mcp` is a stdio server command. It looks idle when run directly because it is waiting for an MCP client; configure it in your agent instead of using it as an interactive command.
 
 ### Prompt fallback
 

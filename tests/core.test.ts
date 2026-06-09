@@ -130,3 +130,33 @@ describe("vault core", () => {
     expect(md).toContain("| harness-bridge | `../harness-bridge/` | AI handoff | v1 |");
   });
 });
+
+describe("skill installer", () => {
+  let installDir: string;
+
+  beforeEach(() => {
+    installDir = fs.mkdtempSync(path.join(os.tmpdir(), "harness-wiki-skill-test-"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(installDir, { recursive: true, force: true });
+  });
+
+  it("installs the packaged skill into a target skills directory", async () => {
+    const { installSkill } = await import("../src/core/skill.js");
+    const result = installSkill({ targetDir: installDir });
+
+    expect(result.target).toBe(path.join(installDir, "harness-wiki", "SKILL.md"));
+    expect(fs.existsSync(result.target)).toBe(true);
+    expect(fs.readFileSync(result.target, "utf8")).toContain("name: harness-wiki");
+  });
+
+  it("refuses to overwrite an existing skill without force", async () => {
+    const { installSkill } = await import("../src/core/skill.js");
+    installSkill({ targetDir: installDir });
+
+    expect(() => installSkill({ targetDir: installDir })).toThrow(/Refusing to overwrite/);
+    const forced = installSkill({ targetDir: installDir, force: true });
+    expect(forced.overwritten).toBe(true);
+  });
+});

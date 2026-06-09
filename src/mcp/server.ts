@@ -4,6 +4,7 @@ import { z } from "zod";
 import { initVault, vaultStatus } from "../core/vault.js";
 import { PACKAGE_VERSION } from "../core/version.js";
 import fs from "node:fs";
+import path from "node:path";
 
 const VAULT_INIT_PROMPT_FILE = "vault-init.md";
 const PROMPT_DIR = new URL("../../prompts/", import.meta.url);
@@ -27,6 +28,10 @@ function readVaultInitPrompt(): string {
   return fs.readFileSync(new URL(VAULT_INIT_PROMPT_FILE, PROMPT_DIR), "utf8");
 }
 
+function resolveToolCwd(serverCwd: string, toolCwd: string | undefined): string {
+  return toolCwd ? path.resolve(serverCwd, toolCwd) : serverCwd;
+}
+
 export function createHarnessWikiServer(cwd = process.cwd()): McpServer {
   const server = new McpServer(
     {
@@ -35,7 +40,7 @@ export function createHarnessWikiServer(cwd = process.cwd()): McpServer {
     },
     {
       instructions:
-        "Use Harness Wiki tools to scaffold and maintain an LLM Wiki — an Obsidian-compatible markdown knowledge vault the agent owns. Call vault_init to create the vault scaffold and vault_status to inspect it. Fetch the canonical setup/operations prompt via the wiki_init_prompt MCP prompt."
+        "Use Harness Wiki tools to scaffold and maintain an LLM Wiki — an Obsidian-compatible markdown knowledge vault the agent owns. Call vault_init to create the vault scaffold and vault_status to inspect it. Always pass the target workspace absolute path as cwd when the agent knows it; otherwise the tool falls back to the MCP server process directory. Fetch the canonical setup/operations prompt via the wiki_init_prompt MCP prompt."
     }
   );
 
@@ -81,8 +86,12 @@ export function createHarnessWikiServer(cwd = process.cwd()): McpServer {
 
   server.tool(
     "vault_init",
-    "Scaffold an LLM Wiki / second-brain vault in the current directory: creates raw/, wiki/{entities,concepts,sources,syntheses}/, CLAUDE.md, AGENTS.md, wiki/index.md, wiki/log.md. Works in an empty dir (standalone vault) or alongside an existing project (appends a marker-fenced vault schema to the host CLAUDE.md/AGENTS.md). Idempotent on the schema-append path.",
+    "Scaffold an LLM Wiki / second-brain vault in the target directory: creates raw/, wiki/{entities,concepts,sources,syntheses}/, CLAUDE.md, AGENTS.md, wiki/index.md, wiki/log.md. Works in an empty dir (standalone vault) or alongside an existing project (appends a marker-fenced vault schema to the host CLAUDE.md/AGENTS.md). Idempotent on the schema-append path. Pass cwd as the workspace absolute path to avoid initializing the MCP server launch directory.",
     {
+      cwd: z
+        .string()
+        .optional()
+        .describe("Target vault/workspace directory. Prefer an absolute path. Defaults to the MCP server process cwd when omitted."),
       vaultName: z.string().describe("Display name for the vault (used in CLAUDE.md heading and wiki/index.md)."),
       domain: z
         .string()
@@ -104,8 +113,14 @@ export function createHarnessWikiServer(cwd = process.cwd()): McpServer {
         .default(false)
         .describe("Override vault-specific collisions (existing wiki/ or vault-marked CLAUDE.md). Does not touch unrelated host-project files.")
     },
-    async ({ vaultName, domain, pairedProjects, force }) => {
-      const result = initVault({ cwd, vaultName, domain, pairedProjects, force });
+    async ({ cwd: toolCwd, vaultName, domain, pairedProjects, force }) => {
+      const result = initVault({
+        cwd: resolveToolCwd(cwd, toolCwd),
+        vaultName,
+        domain,
+        pairedProjects,
+        force
+      });
       const lines: string[] = [
         `Vault initialized (${result.scenario}) at ${result.cwd}.`,
         ""
@@ -131,9 +146,14 @@ export function createHarnessWikiServer(cwd = process.cwd()): McpServer {
 
   server.tool(
     "vault_status",
-    "Report vault scaffold state in the current directory: which expected dirs/files exist, whether CLAUDE.md carries the vault marker, and which files in raw/ have no matching wiki/sources/<slug>.md (pending ingests).",
-    {},
-    async () => jsonResponse(vaultStatus(cwd))
+    "Report vault scaffold state in the target directory: which expected dirs/files exist, whether CLAUDE.md carries the vault marker, and which files in raw/ have no matching wiki/sources/<slug>.md (pending ingests). Pass cwd as the workspace absolute path to avoid inspecting the MCP server launch directory.",
+    {
+      cwd: z
+        .string()
+        .optional()
+        .describe("Target vault/workspace directory. Prefer an absolute path. Defaults to the MCP server process cwd when omitted.")
+    },
+    async ({ cwd: toolCwd }) => jsonResponse(vaultStatus(resolveToolCwd(cwd, toolCwd)))
   );
 
   return server;
