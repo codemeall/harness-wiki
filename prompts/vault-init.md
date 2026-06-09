@@ -39,7 +39,7 @@ I curate. You maintain. The wiki compounds.
 
 ## Three operations
 
-- **Ingest** (`ingest raw/<file>` or `ingest <url>`) — Read source end-to-end. Discuss key takeaways with me **before writing** so I can guide emphasis. Write `wiki/sources/<slug>.md`, update or create relevant entity/concept pages, integrate the new info into existing syntheses, update `index.md`, append to `log.md`. A single source typically touches 5–15 pages.
+- **Ingest** (`ingest raw/<file>` or `ingest <url>`) — Read source end-to-end. For a URL, first save the fetched content into `raw/` (text as `raw/<slug>.md`, images into `raw/assets/`) so the source is captured immutably, then ingest that file. Discuss key takeaways with me **before writing** so I can guide emphasis. Write `wiki/sources/<slug>.md` (slug = kebab-case of the raw filename, so tooling can pair them), update or create relevant entity/concept pages, integrate the new info into existing syntheses, update `index.md`, append to `log.md`, and record the source hash (`vault_stamp`, or `source_file` + `source_sha256` frontmatter) so staleness can be detected later. A single source typically touches 5–15 pages.
 
 - **Query** (any question) — Read `wiki/index.md` first, drill into relevant pages, follow `[[wikilinks]]`, synthesize an answer with inline citations to wiki pages (which themselves cite sources). If the answer is substantive (comparison, analysis, novel connection), offer to file it as `wiki/syntheses/<slug>.md` so the insight compounds.
 

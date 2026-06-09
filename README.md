@@ -6,6 +6,26 @@ You curate sources and ask questions; the agent summarizes, cross-references, fi
 
 > **Companion product.** [`@codemeall/harness-bridge`](https://github.com/codemeall/harness-bridge) tracks the **current in-flight task** in one repo via `.harness/bridge.md`. Harness Wiki tracks the **durable knowledge** around many tasks — research, design rationale, decisions. Use them together: wiki for the *why*, project repos for the *what*, bridge files for the *current work*.
 
+## Quickstart
+
+In any agent that can load a skill (Claude Code, Codex, …), open the folder you want to become your knowledge base and say:
+
+```text
+Use the Harness Wiki skill to initialize an LLM Wiki vault here. Name: knowledge. Domain: <your topic>.
+```
+
+Then just work with it in plain language:
+
+1. **Feed it** — drop a file into `raw/`, then say `ingest raw/<file>` (or `ingest <url>`).
+2. **Ask it** — ask any question; the agent answers from the wiki with citations.
+3. **Maintain it** — say `lint` for a periodic health check.
+
+That's the whole loop. You curate and ask; the agent does the summarizing, cross-referencing, and filing. **Want to see the output before installing anything?** Browse [`examples/knowledge-vault/`](./examples/) — a small, complete vault.
+
+## The wedge: wiki ↔ repo ↔ bridge
+
+Notes apps store text; Harness Wiki stores *decisions and the work they feed*. A vault registers the sibling project repos it serves (`vault_link`), so design rationale connects to implementation: the **wiki holds the why**, the **project repo holds the what**, and [`harness-bridge`](https://github.com/codemeall/harness-bridge) holds the **current work**. When a synthesis is approved, it hands off to the paired repo for implementation — and substantive decisions made there flow back into the vault. `vault_doctor` keeps the structure honest: stale source pages (the raw file changed since you ingested it) and broken project links get flagged on every health check.
+
 ## What you get
 
 `harness-wiki` gives agents a portable skill for the full vault lifecycle. MCP and CLI commands are optional accelerators for deterministic scaffold/status operations; the actual ingest/query/lint operations are agent-driven, guided by the skill and the schema written into `CLAUDE.md` / `AGENTS.md`.
@@ -138,7 +158,11 @@ When calling MCP tools, the agent should pass the target workspace absolute path
 | Tool | Purpose |
 |---|---|
 | `vault_init` | Scaffold the vault at optional `cwd`: creates `raw/`, `wiki/{entities,concepts,sources,syntheses}/`, `CLAUDE.md`, `AGENTS.md`, `wiki/index.md`, `wiki/log.md`. Auto-detects empty dir (standalone vault) vs. existing project (appends a marker-fenced `<!-- harness-wiki:vault-schema -->` block to the host `CLAUDE.md` / `AGENTS.md` without touching other content). Idempotent on re-run via the marker. |
-| `vault_status` | Report scaffold state at optional `cwd` and list files in `raw/` with no matching `wiki/sources/<slug>.md` (pending ingests). |
+| `vault_status` | Report scaffold state at optional `cwd` and list files in `raw/` with no matching `wiki/sources/<slug>.md` (pending ingests). Filename/slug matching is normalized, so `PRD Checkout V2.pdf` pairs with `prd-checkout-v2.md`. |
+| `vault_doctor` | Deterministic structural health check: pages missing YAML frontmatter, dead `[[wikilinks]]`, orphan pages with no inbound links, and pages absent from `wiki/index.md`. The mechanical first pass of a `lint`. |
+| `vault_search` | Plain-text search across all `wiki/` pages (case-insensitive), returning file + line + matching text. For locating relevant pages in a large vault before answering a query. |
+| `vault_stamp` | Record `source_file` + `source_sha256` into source-page frontmatter so `vault_doctor` can detect when a raw source file changes (a stale page). Run after each ingest; re-run to acknowledge a re-review. |
+| `vault_link` | Register a sibling project in the Paired-projects table and write a marker-fenced back-pointer into that repo's `CLAUDE.md`. The wiki↔repo wedge — discoverable from both sides, idempotent. |
 
 **MCP prompt:** `wiki_init_prompt` returns the canonical setup/operations prompt (also available as the resource `harness-wiki://prompts/vault-init.md`).
 
@@ -148,6 +172,10 @@ When calling MCP tools, the agent should pass the target workspace absolute path
 harness-wiki mcp                                              # run the MCP server (stdio)
 harness-wiki vault-init --name "knowledge" --domain "software project" [--cwd <path>] [--force]
 harness-wiki vault-status [--cwd <path>]
+harness-wiki vault-doctor [--cwd <path>]                      # structural health check
+harness-wiki vault-search "<query>" [--cwd <path>] [--limit <n>]
+harness-wiki vault-stamp [--cwd <path>]                       # record source hashes for staleness
+harness-wiki vault-link --name <n> --path <p> --purpose <text> --status <text> [--cwd <path>]
 harness-wiki skill-install <codex|agents|local> [--force]
 harness-wiki skill-install --target <skillsDir> [--force]
 ```
@@ -163,6 +191,7 @@ If your agent cannot load skills, paste [`prompts/vault-init.md`](./prompts/vaul
 ## Documentation
 
 - [`docs/llm-wiki.md`](./docs/llm-wiki.md) — full setup, daily ingest/query/lint workflow, and when to use the wiki vs. a project repo.
+- [`docs/example-feature-workflow.md`](./docs/example-feature-workflow.md) — a worked flow: tracking features, a pending list, moving items to done, reopening them, and asking about a feature's options.
 
 ## License
 

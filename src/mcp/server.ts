@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { initVault, vaultStatus } from "../core/vault.js";
+import { initVault, vaultStatus, vaultDoctor, vaultSearch, stampSources, linkProject } from "../core/vault.js";
 import { PACKAGE_VERSION } from "../core/version.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -154,6 +154,77 @@ export function createHarnessWikiServer(cwd = process.cwd()): McpServer {
         .describe("Target vault/workspace directory. Prefer an absolute path. Defaults to the MCP server process cwd when omitted.")
     },
     async ({ cwd: toolCwd }) => jsonResponse(vaultStatus(resolveToolCwd(cwd, toolCwd)))
+  );
+
+  server.tool(
+    "vault_doctor",
+    "Run a deterministic structural health check on the vault: pages missing YAML frontmatter, dead [[wikilinks]] that resolve to no page, orphan pages with no inbound links, and pages absent from wiki/index.md. Complements the agent-driven `lint` operation (which reasons about contradictions and stale claims) with cheap mechanical checks. Pass cwd as the workspace absolute path.",
+    {
+      cwd: z
+        .string()
+        .optional()
+        .describe("Target vault/workspace directory. Prefer an absolute path. Defaults to the MCP server process cwd when omitted.")
+    },
+    async ({ cwd: toolCwd }) => jsonResponse(vaultDoctor(resolveToolCwd(cwd, toolCwd)))
+  );
+
+  server.tool(
+    "vault_search",
+    "Plain-text search across all wiki/ pages (case-insensitive substring match over page content and frontmatter). Returns file + line + matching text. Use to locate relevant pages before a query when the vault is large enough that reading wiki/index.md alone is not enough. Pass cwd as the workspace absolute path.",
+    {
+      cwd: z
+        .string()
+        .optional()
+        .describe("Target vault/workspace directory. Prefer an absolute path. Defaults to the MCP server process cwd when omitted."),
+      query: z.string().describe("Text to search for across wiki pages."),
+      limit: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe("Max number of matching lines to return (default 50).")
+    },
+    async ({ cwd: toolCwd, query, limit }) =>
+      jsonResponse(vaultSearch(resolveToolCwd(cwd, toolCwd), query, limit))
+  );
+
+  server.tool(
+    "vault_stamp",
+    "Record source-file hashes into wiki/sources/*.md frontmatter (source_file + source_sha256). Run this right after an ingest so vault_doctor can later detect when a raw source file has changed (stale), and run it again to acknowledge a re-review after a source legitimately changed. Pass cwd as the workspace absolute path.",
+    {
+      cwd: z
+        .string()
+        .optional()
+        .describe("Target vault/workspace directory. Prefer an absolute path. Defaults to the MCP server process cwd when omitted.")
+    },
+    async ({ cwd: toolCwd }) => jsonResponse(stampSources(resolveToolCwd(cwd, toolCwd)))
+  );
+
+  server.tool(
+    "vault_link",
+    "Register (or update) a sibling project repo in the vault's Paired-projects table, and write a marker-fenced back-pointer into that repo's CLAUDE.md so the link is discoverable from both sides. This is the wiki↔repo wedge: the vault holds the why, the project holds the what. Idempotent. Pass cwd as the vault's absolute path; path is the project location relative to the vault (or absolute).",
+    {
+      cwd: z
+        .string()
+        .optional()
+        .describe("Vault directory (must already be initialized). Prefer an absolute path."),
+      name: z.string().describe("Project name (table key; re-linking the same name updates the row)."),
+      path: z.string().describe("Project location relative to the vault (e.g. '../my-app/') or absolute."),
+      purpose: z.string().describe("One-line description of what the project ships."),
+      status: z.string().describe("Lifecycle status, e.g. 'design', 'building', 'shipped'."),
+      vaultName: z
+        .string()
+        .optional()
+        .describe("Vault display name used in the back-pointer text. Defaults to 'knowledge'.")
+    },
+    async ({ cwd: toolCwd, name, path: projPath, purpose, status, vaultName }) =>
+      jsonResponse(
+        linkProject(
+          resolveToolCwd(cwd, toolCwd),
+          { name, path: projPath, purpose, status },
+          vaultName ?? "knowledge"
+        )
+      )
   );
 
   return server;

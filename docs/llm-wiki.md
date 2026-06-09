@@ -135,6 +135,8 @@ ingest raw/prd-checkout-v2.md
 
 The agent reads the source, surfaces key takeaways before writing, then creates or updates the relevant source, entity, concept, synthesis, index, and log pages after your confirmation.
 
+You can also ingest a URL (`ingest https://…`). The agent first saves the fetched content into `raw/` so the source stays immutable and traceable, then ingests that local copy.
+
 Good sources include design specs, ADRs, meeting transcripts, user interviews, research notes, articles, papers, and substantive product feedback.
 
 ### Query
@@ -155,7 +157,11 @@ Periodically ask:
 lint
 ```
 
-The agent audits the wiki for contradictions, stale claims, orphan pages, missing cross-references, important concepts without pages, and useful next sources or questions.
+The agent starts with a mechanical pass — `vault_doctor` reports pages missing frontmatter, dead `[[wikilinks]]`, orphan pages, pages absent from the index, **stale source pages** (the raw file changed since ingest), and **broken paired-project paths** — then audits for the judgment calls: contradictions, stale claims, missing cross-references, important concepts without pages, and useful next sources or questions.
+
+Staleness works because each ingest records the source file's SHA-256 in the source page (via `vault_stamp`). When the raw file later changes, the hashes diverge and the page is flagged so you can re-ingest and re-stamp.
+
+For large vaults, `vault_search` does a plain-text search across all wiki pages so the agent can locate relevant pages before answering rather than relying on `wiki/index.md` alone.
 
 ## Paired projects
 
@@ -170,7 +176,9 @@ The generated schema includes a `Paired projects` table:
 | <project-name> | `../<project-name>/` | <one line> | <design / building / shipped> |
 ```
 
-When a synthesis becomes an approved design, implementation should happen in the project repo. If the implementation session is long-running, use Harness Bridge inside that project repo to maintain `.harness/bridge.md`.
+Register a project with `vault_link` rather than hand-editing the table: it adds (or updates) the row and writes a marker-fenced back-pointer into the project's `CLAUDE.md`, so the relationship is discoverable from either repo. `vault_doctor` flags rows whose path no longer exists.
+
+When a synthesis becomes an approved design, implementation should happen in the project repo. If the implementation session is long-running, use Harness Bridge inside that project repo to maintain `.harness/bridge.md`. This is the wiki↔repo↔bridge handoff: the wiki holds the *why*, the repo holds the *what*, the bridge holds the *current work*.
 
 ## What belongs where
 

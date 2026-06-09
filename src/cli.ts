@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { initVault, vaultStatus } from "./core/vault.js";
+import { initVault, vaultStatus, vaultDoctor, vaultSearch, stampSources, linkProject } from "./core/vault.js";
 import { runMcpServer } from "./mcp/server.js";
 import { installSkill, skillTargetDir, type SkillInstallPreset } from "./core/skill.js";
 import path from "node:path";
@@ -9,6 +9,10 @@ function usage(): never {
   harness-wiki mcp
   harness-wiki vault-init --name <vaultName> [--domain <domain>] [--cwd <path>] [--force]
   harness-wiki vault-status [--cwd <path>]
+  harness-wiki vault-doctor [--cwd <path>]
+  harness-wiki vault-search <query> [--cwd <path>] [--limit <n>]
+  harness-wiki vault-stamp [--cwd <path>]
+  harness-wiki vault-link --name <name> --path <path> --purpose <text> --status <text> [--cwd <path>] [--vault-name <name>]
   harness-wiki skill-install <codex|agents|local> [--force]
   harness-wiki skill-install --target <skillsDir> [--force]
 `);
@@ -57,6 +61,41 @@ async function main() {
 
   if (command === "vault-status") {
     console.log(JSON.stringify(vaultStatus(resolveCwd(args)), null, 2));
+    return;
+  }
+
+  if (command === "vault-doctor") {
+    console.log(JSON.stringify(vaultDoctor(resolveCwd(args)), null, 2));
+    return;
+  }
+
+  if (command === "vault-search") {
+    const query = args.find((arg) => !arg.startsWith("--"));
+    if (!query) usage();
+    const limitRaw = readFlag(args, "--limit");
+    const limit = limitRaw ? Number.parseInt(limitRaw, 10) : undefined;
+    console.log(JSON.stringify(vaultSearch(resolveCwd(args), query, limit), null, 2));
+    return;
+  }
+
+  if (command === "vault-stamp") {
+    console.log(JSON.stringify(stampSources(resolveCwd(args)), null, 2));
+    return;
+  }
+
+  if (command === "vault-link") {
+    const name = readFlag(args, "--name");
+    const projPath = readFlag(args, "--path");
+    const purpose = readFlag(args, "--purpose");
+    const status = readFlag(args, "--status");
+    if (!name || !projPath || !purpose || !status) usage();
+    const vaultName = readFlag(args, "--vault-name") ?? "knowledge";
+    const result = linkProject(
+      resolveCwd(args),
+      { name, path: projPath, purpose, status },
+      vaultName
+    );
+    console.log(JSON.stringify(result, null, 2));
     return;
   }
 
